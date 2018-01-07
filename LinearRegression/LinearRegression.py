@@ -53,6 +53,7 @@ class LinearRegressionOptimizer:
         squreErr = np.square(error)
         sqErrSum = np.sum(squreErr, axis=0) # vertical sum
         currloss = 0.5 * (sqErrSum + self.__GetRegularizationTerm__(self.regArg)) # 0.5 * prediction loss + regularization
+        currloss /= featureSet.shape[0]
         return currloss;
 
 
