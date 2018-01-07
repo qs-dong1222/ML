@@ -29,8 +29,8 @@ class LogisticRegssionClassifier:
             return None
         else:
             self.n_feature = self.xdata.shape[1]
-            initOffset = np.random.randint(low=-1, high=2, size=self.n_feature)  # randint offset -5~5
-            self.w = np.random.randn(self.n_feature) + initOffset  # fraction[0~1] + offset -5~5
+            initOffset = np.random.randint(low=-1, high=2, size=self.n_feature)  # randint offset -1~1
+            self.w = np.random.randn(self.n_feature) + initOffset  # fraction[0~1] + offset -1~1
             self.w = numpilize(self.w)
             self.b = np.random.randint(-1, 2);
             self.regArg = 0
