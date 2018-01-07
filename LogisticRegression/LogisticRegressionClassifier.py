@@ -1,6 +1,5 @@
 from Batch import *
 import sys
-import math
 
 
 
@@ -18,10 +17,6 @@ def Sigmoid(z):
     return ans
 
 
-
-
-
-kkk = 6
 
 
 class LogisticRegssionClassifier:
