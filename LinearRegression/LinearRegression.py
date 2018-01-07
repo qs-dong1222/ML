@@ -67,20 +67,20 @@ class LinearRegressionOptimizer:
         deriv_w = np.mean(featureSet * (-1) * error, axis=0)
         self.deriv_w_sqsum  += np.square(deriv_w)
         ada_w = np.sqrt(self.deriv_w_sqsum / self.ada_iter)
-        ada_w = np.where(ada_w == 0, 0e-7, ada_w)
+        ada_w = np.where(ada_w == 0, 1e-7, ada_w)
         self.w = (1-self.regArg)*self.w - (learningRate/ada_w)*deriv_w
 
         deriv_b = np.mean((-1) * error, axis=0)
         self.deriv_b_sqsum += np.square(deriv_b)
         ada_b = np.sqrt(self.deriv_b_sqsum / self.ada_iter)
-        ada_b = np.where(ada_b == 0, 0e-7, ada_b)
+        ada_b = np.where(ada_b == 0, 1e-7, ada_b)
         self.b = self.b - (learningRate/ada_b)*deriv_b
 
 
     def GetAccuracy(self, featureSet, labelSet):
         x = numpilize(featureSet)
         y = numpilize(labelSet)
-        y = np.where(y==0, 0e-7, y)
+        y = np.where(y==0, 1e-7, y)
         error = y.T - self.predict(featureSet)
         acc = (1 - np.max(np.abs(error / y.T), axis=0)) * 100
         return acc
