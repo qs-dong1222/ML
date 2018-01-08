@@ -22,6 +22,20 @@ def Sigmoid(z):
 
 
 class LogisticRegssionClassifier:
+    """
+        feature set should follow input format below:
+                   x1 x2 x3 ... xn
+        line No.1  a  b  c  ... k
+        line No.2  m  q  h  ... w
+           ...     .  .  .  ... .
+           ...     .  .  .  ... .
+        line No.k  r  s  t  ... j
+
+
+        label set should follow input format below:
+                   y1 y2 y3 y4 ... yn -> single line data
+        line No.1  a  b  c  d  ... k
+    """
     def __init__(self, featureSet, labelSet):
         self.xdata = numpilize(featureSet)
         self.ydata = numpilize(labelSet)
