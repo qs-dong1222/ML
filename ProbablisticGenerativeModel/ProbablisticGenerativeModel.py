@@ -1,6 +1,15 @@
 from Batch import *
 
 class PGMclassifier:
+    """
+    feature set should follow input format below:
+                   x1 x2 x3 ... xn
+        line No.1  a  b  c  ... k
+        line No.2  m  q  h  ... w
+           ...     .  .  .  ... .
+           ...     .  .  .  ... .
+        line No.k  r  s  t  ... j
+    """
     def __init__(self, xs_class_1, xs_class_2):
         xs_class_1 = numpilize(xs_class_1)
         xs_class_2 = numpilize(xs_class_2)
