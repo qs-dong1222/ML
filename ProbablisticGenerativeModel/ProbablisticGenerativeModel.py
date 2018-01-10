@@ -26,7 +26,7 @@ class PGMclassifier:
         self.w = np.dot((self.mu_c1-self.mu_c2), self.deviaInv)
         self.w = numpilize(self.w)
         self.b = (-0.5) * np.dot(np.dot(self.mu_c1, self.deviaInv), self.mu_c1.T) \
-            + (-0.5) * np.dot(np.dot(self.mu_c2, self.deviaInv), self.mu_c2.T) \
+            + (0.5) * np.dot(np.dot(self.mu_c2, self.deviaInv), self.mu_c2.T) \
             + np.log(float(self.n_sample_c1)/self.n_sample_c2)
 
 
