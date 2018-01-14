@@ -169,7 +169,7 @@ class LogisticRegssionClassifier:
         bias_correct_mtum_b = self.mtum_b / bias_mtum_b
         bias_correct_rmsprop_b = self.rmsprop_b / bias_rmsprop_b
 
-        self.w = (1 - self.regArg) * self.w - learningRate * bias_correct_mtum_w / (np.sqrt(bias_correct_rmsprop_w) + epsilon)
+        self.w = (1 - learningRate*self.regArg) * self.w - learningRate * bias_correct_mtum_w / (np.sqrt(bias_correct_rmsprop_w) + epsilon)
         self.b = self.b - learningRate * bias_correct_mtum_b / (np.sqrt(bias_correct_rmsprop_b) + epsilon)
 
 
