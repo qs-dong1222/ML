@@ -172,9 +172,9 @@ class MatrixFactorizer:
 
 
 
-Y_true = [[5,4,1],
-         [5,5,0],
-         [np.NaN,4,1],
+Y_true = [[10,9,15],
+         [28,7,6],
+         [np.NaN,9,1],
          [1,np.NaN,5],
          [0,0,5]]
 
