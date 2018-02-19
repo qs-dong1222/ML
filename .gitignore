@@ -8,3 +8,10 @@ Pytorch/leona.jpg
 Pytorch/cifar-10-data/cifar-10-python.tar.gz
 Pytorch/cifar-10-data/cifar-10-python.tar.gz
 *.jpg
+Pytorch/cifar-10-data/cifar-10-batches-py/data_batch_1
+Pytorch/cifar-10-data/cifar-10-batches-py/data_batch_2
+Pytorch/cifar-10-data/cifar-10-batches-py/data_batch_3
+Pytorch/cifar-10-data/cifar-10-batches-py/data_batch_4
+Pytorch/cifar-10-data/cifar-10-batches-py/data_batch_5
+Pytorch/cifar-10-data/cifar-10-batches-py/readme.html
+Pytorch/cifar-10-data/cifar-10-batches-py/test_batch
