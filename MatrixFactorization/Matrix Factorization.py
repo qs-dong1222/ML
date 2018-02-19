@@ -91,6 +91,7 @@ class MatrixFactorizer:
                 err_col_rep = np.tile(err_col, (1, self.n_features))
                 grad_x = err_col_rep * self.W[col]
                 G_x += grad_x
+                #print("grad_x: ", grad_x) ######################
             G_x /= error.shape[1]
             G_b = numpilize(G_b)
             return G_x, G_b
@@ -184,7 +185,7 @@ mf = MatrixFactorizer(Y_true, 6)
 pred = mf.predict()
 print(pred)
 
-mf.fit(lr=0.01,regArg=0,train_times=1000,showLoss=True)
+mf.fit(lr=0.01, regArg=0, train_times=2000, showLoss=True)
 
 pred = mf.predict()
 print(pred)
