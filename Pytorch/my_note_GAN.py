@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 
 
 # hyper parameters
-N_FEATURES = 30
-N_TRUE_SAMPLES = 2000
+N_FEATURES = 20
+N_TRUE_SAMPLES = 1000
 N_RANDOM_IN = 5
-EPOCH = 20000
+EPOCH = 4000
 K = 3
 N_NEURONS = 128
 
@@ -44,13 +44,13 @@ class Generator(t.nn.Module):
         super(Generator, self).__init__()
         self.gen_1 = t.nn.Sequential(
             t.nn.Linear(N_RANDOM_IN, N_NEURONS),
-            #t.nn.BatchNorm1d(20),
+            t.nn.BatchNorm1d(N_NEURONS),
             #t.nn.Tanh(),
             t.nn.ReLU(),
         )
         self.gen_2 = t.nn.Sequential(
             t.nn.Linear(N_NEURONS, N_NEURONS),
-            #t.nn.BatchNorm1d(20),
+            t.nn.BatchNorm1d(N_NEURONS),
             #t.nn.Tanh()
             t.nn.ReLU()
         )
@@ -77,12 +77,14 @@ class Discriminator(t.nn.Module):
         super(Discriminator, self).__init__()
         self.dis_1 = t.nn.Sequential(
             t.nn.Linear(N_FEATURES, N_NEURONS),
-            #t.nn.BatchNorm1d(10),
+            #t.nn.BatchNorm1d(N_NEURONS),
+            t.nn.Dropout(),
             t.nn.ReLU()
         )
         self.dis_2 = t.nn.Sequential(
             t.nn.Linear(N_NEURONS, N_NEURONS),
-            #t.nn.BatchNorm1d(10),
+            #t.nn.BatchNorm1d(N_NEURONS),
+            t.nn.Dropout(),
             t.nn.ReLU()
         )
         self.dis_3 = t.nn.Sequential(
@@ -126,8 +128,8 @@ for epoch in range(EPOCH):
     t_xs = t.FloatTensor(ys)
     v_xs = Variable(t_xs).cuda()
     ######  create fake data  ######
-    # for i in range(K):
-    while(True):
+    for i in range(K):
+    # while(True):
         Gout = G(v_random_in_xs)
         Dout_inter, Dout = D(v_xs)
         loss_D = - t.mean(t.log(Dout) + t.log(1 - D(Gout)[1]))
@@ -136,8 +138,8 @@ for epoch in range(EPOCH):
         loss_D.backward(retain_graph=True)
         # loss.backward()
         opt_D.step()
-        if(loss_D.data.cpu()[0] - 0.5 <= 0.0001):
-            break
+        # if(loss_D.data.cpu()[0] - 0.5 <= 0.0001):
+        #     break
 
 
 
@@ -157,9 +159,11 @@ for epoch in range(EPOCH):
     if (epoch % 10 == 0):
         plt.cla()
         plt.plot(s_x[0], ys[0])
-        Gout = G(v_random_in_xs[0])
-        Gout = Gout.cpu().data.numpy()
+        Gout = G(v_random_in_xs[0:10])
+        Gout = Gout.cpu().data.numpy()[0]
         plt.plot(s_x[0], Gout)
         plt.text(0.5, 0.2, "loss G: %.4f" % (loss_G))
         plt.text(0.5, 0.5, "loss D: %.4f" % (loss_D))
+        plt.text(0.5, 0.8, "epoch: %d" % (epoch))
+        print(epoch)
         plt.pause(0.01)
