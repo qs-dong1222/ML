@@ -1,0 +1,17 @@
+
+*.pdf
+*.meta
+Pytorch/cifar-10-data/cifar-10-batches-py/data_batch_1
+Pytorch/cifar-10-data/cifar-10-batches-py/data_batch_2
+Pytorch/cifar-10-data/cifar-10-batches-py/data_batch_3
+Pytorch/cifar-10-data/cifar-10-batches-py/data_batch_4
+Pytorch/cifar-10-data/cifar-10-batches-py/data_batch_5
+Pytorch/cifar-10-data/cifar-10-batches-py/readme.html
+Pytorch/cifar-10-data/cifar-10-batches-py/test_batch
+Pytorch/DCGAN_2.py
+*.pkl
+*.pyc
+Pytorch/MNIST/MNIST_processing.py
+*.npy
+*.idx3-ubyte
+*.idx1-ubyte
