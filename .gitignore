@@ -15,3 +15,4 @@ Pytorch/MNIST/MNIST_processing.py
 *.npy
 *.idx3-ubyte
 *.idx1-ubyte
+*.jpg
