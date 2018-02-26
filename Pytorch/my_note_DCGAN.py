@@ -12,10 +12,9 @@ import torch.utils.data as utdata
 n_G_datain_w = 1  # random input width size for Generator
 n_G_datain_h = 1  # random input height size for Generator
 n_G_code_len = 100 # random input channel size for Generator
-BATCH_SIZE = 64
-EPOCH = 10001
-D_k_loop = 5
-
+BATCH_SIZE = 128
+EPOCH = 5001
+D_k_loop = 1
 
 
 
@@ -101,8 +100,8 @@ print(D)
 
 
 # optimizer
-opt_D = torchOpt.Adam(D.parameters(), lr=0.0002, betas=(0.5, 0.999))
-opt_G = torchOpt.Adam(G.parameters(), lr=0.0002, betas=(0.5, 0.999))
+opt_D = torchOpt.Adam(D.parameters(), lr=0.0001, betas=(0.5, 0.999))
+opt_G = torchOpt.Adam(G.parameters(), lr=0.0001, betas=(0.5, 0.999))
 
 
 # dataset preparation
@@ -112,28 +111,29 @@ dataLoader = utdata.DataLoader(dataSet, batch_size=BATCH_SIZE, shuffle=True)
 
 for epoch in range(EPOCH):
     for k, [batch_xs, batch_ys] in zip(range(D_k_loop), dataLoader):
+        ###################################### original DCGAN ######################################
         G_x_in = Variable(t.randn(BATCH_SIZE, n_G_code_len, n_G_datain_h, n_G_datain_w)).cuda()
-        #G_x_in = Variable(t.randn(BATCH_SIZE, n_G_code_len)).cuda()
         batch_xs_cuda = Variable(batch_xs).view(BATCH_SIZE, 1, 28, 28).cuda()
-
+        
         fake_xs = G(G_x_in)
         Dout = D(batch_xs_cuda)
         loss_D = - t.mean(t.log(t.clamp(Dout, min=1e-11)) + t.log(t.clamp(1-D(fake_xs), min=1e-11)))
         opt_D.zero_grad()
         loss_D.backward(retain_graph=False)
         opt_D.step()
+        ###################################### original DCGAN ######################################
+
+
 
     G_x_in = Variable(t.randn(BATCH_SIZE, n_G_code_len, n_G_datain_h, n_G_datain_w)).cuda()
-    #G_x_in = Variable(t.randn(BATCH_SIZE, n_G_code_len)).cuda()
     fake_xs = G(G_x_in)
-    # loss_G = t.mean(t.log(1 - D(fake_xs)))  # original G loss
     loss_G = t.mean(-t.log(t.clamp(D(fake_xs), min=1e-11)))  # improved G loss
     opt_G.zero_grad()
     loss_G.backward(retain_graph=False)
     opt_G.step()
 
     print("loss_D = %.6f  " % (loss_D.data.cpu()[0]), "loss_G = %.6f  " % (loss_G.data.cpu()[0]))
-	
+
     if(epoch%500==0):
         G_x_in = Variable(t.randn(25, n_G_code_len, n_G_datain_h, n_G_datain_w)).cuda()
         imgs_25 = G(G_x_in).view(25, 28, 28)
@@ -144,7 +144,8 @@ for epoch in range(EPOCH):
     
         plt.imshow(grid_imgs, cmap='gray')
         name = str(loss_G.data.cpu()[0])
-        plt.savefig("./DCGAN_imgs/" + str(epoch) + "_" + name + ".jpg")
+        # plt.savefig("./DCGAN_imgs/" + str(epoch) + "_" + name + ".jpg")
+        plt.savefig("./DCGAN_imgs/" + str(epoch) + ".jpg")
         print("epoch: ", epoch)
 
 
