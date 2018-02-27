@@ -12,10 +12,10 @@ import torch.utils.data as utdata
 n_G_datain_w = 1  # random input width size for Generator
 n_G_datain_h = 1  # random input height size for Generator
 n_G_code_len = 100 # random input channel size for Generator
-BATCH_SIZE = 128
+BATCH_SIZE = 64
 EPOCH = 5001
-D_k_loop = 1
-gamma = 100
+D_k_loop = 5
+gamma = 10
 
 
 
@@ -100,8 +100,8 @@ print(D)
 
 
 # optimizer
-opt_D = torchOpt.Adam(D.parameters(), lr=0.0001, betas=(0.5, 0.999))
-opt_G = torchOpt.Adam(G.parameters(), lr=0.0001, betas=(0.5, 0.999))
+opt_D = torchOpt.Adam(D.parameters(), lr=0.0001, betas=(0, 0.9))
+opt_G = torchOpt.Adam(G.parameters(), lr=0.0001, betas=(0, 0.9))
 
 
 # dataset preparation
@@ -115,19 +115,25 @@ for epoch in range(EPOCH):
         G_x_in = Variable(t.randn(BATCH_SIZE, n_G_code_len, n_G_datain_h, n_G_datain_w)).cuda()
         batch_xs_cuda = Variable(batch_xs).view(BATCH_SIZE, 1, 28, 28).cuda()
         
+        opt_D.zero_grad()
+        
         fake_xs = G(G_x_in)
-        ori_w_loss = t.mean(D(batch_xs_cuda)) - t.mean(D(fake_xs))
+        Wasserstein_D = t.mean(D(batch_xs_cuda)) - t.mean(D(fake_xs))
+        Wasserstein_D.backward(-1 * t.ones(Wasserstein_D.size()).cuda())
+        
         
         alpha = Variable(t.rand(fake_xs.size())).cuda()
-        penalty_xs = alpha * batch_xs_cuda - (1 - alpha) * fake_xs
+        penalty_xs = (alpha * batch_xs_cuda - (1 - alpha) * fake_xs).detach()
+        penalty_xs.requires_grad = True
         penalty_out = D(penalty_xs)
-        penalty_xs_grad = t.autograd.grad(penalty_out, penalty_xs, t.ones(penalty_out.size()).cuda(), retain_graph=True)
-        penalty = gamma * t.mean(t.pow(t.norm(penalty_xs_grad[0]) - 1, 2))
-
-        opt_D.zero_grad()
-        penalty.volatile = False
-        loss_D = -(ori_w_loss - penalty)
-        loss_D.backward(retain_graph=False)
+        penalty_xs_grad = t.autograd.grad(outputs=penalty_out, inputs=penalty_xs, 
+                                           grad_outputs=t.ones(penalty_out.size()).cuda(), create_graph=True, only_inputs=True)
+        penalty = gamma * t.mean(t.pow(t.norm(penalty_xs_grad[0], dim=1) - 1, 2))
+        
+        penalty.backward(t.ones(penalty.size()).cuda())
+        
+        # penalty.volatile = False
+        loss_D = Wasserstein_D - penalty  # loss_D should be as bigger as possible
         opt_D.step()
         ###################################### improved WGAN ######################################
 
@@ -135,9 +141,9 @@ for epoch in range(EPOCH):
 
     G_x_in = Variable(t.randn(BATCH_SIZE, n_G_code_len, n_G_datain_h, n_G_datain_w)).cuda()
     fake_xs = G(G_x_in)
-    loss_G = t.mean(-t.log(t.clamp(D(fake_xs), min=1e-11)))  # improved G loss
+    loss_G = -1 * t.mean(D(fake_xs))  
     opt_G.zero_grad()
-    loss_G.backward(retain_graph=False)
+    loss_G.backward()
     opt_G.step()
 
     print("loss_D = %.6f  " % (loss_D.data.cpu()[0]), "loss_G = %.6f  " % (loss_G.data.cpu()[0]))
@@ -153,7 +159,7 @@ for epoch in range(EPOCH):
         plt.imshow(grid_imgs, cmap='gray')
         name = str(loss_G.data.cpu()[0])
         # plt.savefig("./DCGAN_imgs/" + str(epoch) + "_" + name + ".jpg")
-        plt.savefig("./DCGAN_imgs/" + str(epoch) + ".jpg")
+        plt.savefig("./DCGAN_imgs/" + str(epoch) + "_DCWGAN_GP" + ".jpg")
         print("epoch: ", epoch)
 
 
