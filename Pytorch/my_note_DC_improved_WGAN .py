@@ -109,32 +109,43 @@ dataSet = utdata.TensorDataset(data_tensor=t.FloatTensor(train_images), target_t
 dataLoader = utdata.DataLoader(dataSet, batch_size=BATCH_SIZE, shuffle=True)
 
 
+from my_ext_api import *
+w_gp_loss = Wasserstein_GP_Loss().cuda()
+
+
 for epoch in range(EPOCH):
     for k, [batch_xs, batch_ys] in zip(range(D_k_loop), dataLoader):
         ###################################### improved WGAN ######################################
         G_x_in = Variable(t.randn(BATCH_SIZE, n_G_code_len, n_G_datain_h, n_G_datain_w)).cuda()
         batch_xs_cuda = Variable(batch_xs).view(BATCH_SIZE, 1, 28, 28).cuda()
-        
+
         opt_D.zero_grad()
-        
         fake_xs = G(G_x_in)
-        Wasserstein_D = t.mean(D(batch_xs_cuda)) - t.mean(D(fake_xs))
-        Wasserstein_D.backward(-1 * t.ones(Wasserstein_D.size()).cuda())
-        
-        
-        alpha = Variable(t.rand(fake_xs.size())).cuda()
-        penalty_xs = (alpha * batch_xs_cuda - (1 - alpha) * fake_xs).detach()
-        penalty_xs.requires_grad = True
-        penalty_out = D(penalty_xs)
-        penalty_xs_grad = t.autograd.grad(outputs=penalty_out, inputs=penalty_xs, 
-                                           grad_outputs=t.ones(penalty_out.size()).cuda(), create_graph=True, only_inputs=True)
-        penalty = gamma * t.mean(t.pow(t.norm(penalty_xs_grad[0], dim=1) - 1, 2))
-        
-        penalty.backward(t.ones(penalty.size()).cuda())
-        
-        # penalty.volatile = False
-        loss_D = Wasserstein_D - penalty  # loss_D should be as bigger as possible
+        w_loss = w_gp_loss(D_model=D, fxs=fake_xs, rxs=batch_xs_cuda)
+        w_loss.backward()
         opt_D.step()
+
+        loss_D = w_loss
+
+        # opt_D.zero_grad()
+        # fake_xs = G(G_x_in)
+        # Wasserstein_D = t.mean(D(batch_xs_cuda)) - t.mean(D(fake_xs))
+        # Wasserstein_D.backward(-1 * t.ones(Wasserstein_D.size()).cuda())
+        #
+        #
+        # alpha = Variable(t.rand(fake_xs.size())).cuda()
+        # penalty_xs = (alpha * batch_xs_cuda - (1 - alpha) * fake_xs).detach()
+        # penalty_xs.requires_grad = True
+        # penalty_out = D(penalty_xs)
+        # penalty_xs_grad = t.autograd.grad(outputs=penalty_out, inputs=penalty_xs,
+        #                                    grad_outputs=t.ones(penalty_out.size()).cuda(), create_graph=True, only_inputs=True)
+        # penalty = gamma * t.mean(t.pow(t.norm(penalty_xs_grad[0], dim=1) - 1, 2))
+        #
+        # penalty.backward(t.ones(penalty.size()).cuda())
+        #
+        # # penalty.volatile = False
+        # loss_D = Wasserstein_D - penalty  # loss_D should be as bigger as possible
+        # opt_D.step()
         ###################################### improved WGAN ######################################
 
 
