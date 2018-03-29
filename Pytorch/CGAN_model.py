@@ -7,12 +7,9 @@ class Gen(t.nn.Module):
     def __init__(self, z_dim, y_dim):
         super(Gen, self).__init__()
         self.l1 = t.nn.Sequential(
-            t.nn.Linear(z_dim+y_dim, 1024),
+            t.nn.Linear(z_dim+y_dim, 128),
             t.nn.ReLU(),
-            t.nn.Linear(1024, 1024),
-            t.nn.BatchNorm1d(1024),
-            t.nn.ReLU(),
-            t.nn.Linear(1024, 784),
+            t.nn.Linear(128, 784),
             t.nn.Sigmoid()
         )
 
@@ -26,21 +23,10 @@ class Dis(t.nn.Module):
     def __init__(self, x_dim, y_dim):
         super(Dis, self).__init__()
         self.l1 = t.nn.Sequential(
-            t.nn.Linear(x_dim+y_dim, 512),
-            Maxout(512, 256, 5),
-            # t.nn.Linear(256, 256),
-            # t.nn.BatchNorm1d(256),
-            Maxout(256, 128, 5),
-            # t.nn.Linear(128, 128),
-            # t.nn.BatchNorm1d(128),
-            Maxout(128, 64, 5),
-            # t.nn.Linear(64, 64),
-            # t.nn.BatchNorm1d(64),
-            Maxout(64, 1, 5),
-            # t.nn.Linear(32, 32),
-            # t.nn.BatchNorm1d(32),
-            # Maxout(32, 1, 5)
-            # t.nn.Sigmoid()
+            t.nn.Linear(x_dim+y_dim, 128),
+            t.nn.ReLU(),
+            t.nn.Linear(128, 1),
+            t.nn.Sigmoid()
         )
 
     def forward(self, xy):
@@ -48,6 +34,9 @@ class Dis(t.nn.Module):
         return output
 
 
+        
+        
+        
 
 
 # G = Gen(100, 10)

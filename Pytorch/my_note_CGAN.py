@@ -12,8 +12,8 @@ LR = 0.01
 BATCH_SIZE = 100
 DECAY = 1.00004
 MOMENTUM = 0.5
-EPOCH = 10001
-K = 3
+EPOCH = 50001
+K = 1
 
 
 
@@ -29,8 +29,8 @@ if __name__ == '__main__':
 
     # one hot
     labels_one_hot = t.zeros(len(train_labels), 10).scatter_(1, t.LongTensor(train_labels[:, np.newaxis]), 1)
-    np.random.shuffle(train_labels)
-    fake_labels_one_hot = t.zeros(len(train_labels), 10).scatter_(1, t.LongTensor(train_labels[:, np.newaxis]), 1)
+    # np.random.shuffle(train_labels)
+    # fake_labels_one_hot = t.zeros(len(train_labels), 10).scatter_(1, t.LongTensor(train_labels[:, np.newaxis]), 1)
 
 
 
@@ -38,8 +38,8 @@ if __name__ == '__main__':
     from CGAN_model import *
     G = Gen(z_dim=100, y_dim=10).cuda()
     D = Dis(x_dim=784, y_dim=10).cuda()
-    init_model_weight(G, xavier_uniform)
-    init_model_weight(D, xavier_uniform)
+    init_model_weight(G, xavier_normal)
+    init_model_weight(D, xavier_normal)
     print(G)
     print(D)
 
@@ -50,8 +50,8 @@ if __name__ == '__main__':
     # optimizer
     # opt_D = t.optim.SGD(D.parameters(), lr=LR, momentum=MOMENTUM, weight_decay=DECAY)
     # opt_G = t.optim.SGD(G.parameters(), lr=LR, momentum=MOMENTUM, weight_decay=DECAY)
-    opt_D = t.optim.Adam(D.parameters(), lr=0.0001, betas=(0, 0.9), weight_decay=0)
-    opt_G = t.optim.Adam(G.parameters(), lr=0.0001, betas=(0, 0.9), weight_decay=0)
+    opt_D = t.optim.Adam(D.parameters())
+    opt_G = t.optim.Adam(G.parameters())
 
 
 
@@ -65,34 +65,35 @@ if __name__ == '__main__':
 
     for epoch in range(EPOCH):
         for k, [batch_xs, batch_ys] in zip(range(K), dataLoader):
-            # noise = Variable(t.rand(BATCH_SIZE, 100, 1, 1, 1).view(BATCH_SIZE, 100)).cuda()
-            # true_xs, true_ys = Variable(batch_xs).view(-1, 784).cuda(), Variable(batch_ys).cuda()
-            # fake_xs = G(noise, true_ys).detach()
-            #
-            # opt_D.zero_grad()
-            # # train with fakes
-            # fake_pred = - t.log(  t.clamp(1-D(fake_xs, true_ys), min=1e-11)  ).mean()
-            # fake_pred.backward(t.ones(fake_pred.size()).cuda())
-            # # train with trues
-            # true_pred = - t.log(  t.clamp(D(true_xs, true_ys), min=1e-11)  ).mean()
-            # true_pred.backward(t.ones(true_pred.size()).cuda())
-            # opt_D.step()
-            # print(-fake_pred-true_pred)
-            noise = Variable(t.rand(BATCH_SIZE, 100, 1, 1, 1).view(BATCH_SIZE, 100)).cuda()
+            noise = noise = Variable(t.rand(BATCH_SIZE, 100)).cuda()
             true_xs, true_ys = Variable(batch_xs).view(-1, 784).cuda(), Variable(batch_ys).cuda()
+            fake_xs = G(t.cat((noise, true_ys), dim=1)).detach()
+            
             opt_D.zero_grad()
-            fake_xs = G(t.cat((noise, true_ys), dim=1))
-            w_loss = w_gp_loss(D_model=D, fxs=t.cat((fake_xs, true_ys), dim=1), rxs=t.cat((true_xs, true_ys), dim=1))
-            w_loss.backward()
+            # train with fakes
+            fake_pred = - t.log(  1-D(t.cat((fake_xs, true_ys), dim=1))  ).mean()
+            fake_pred.backward(t.ones(fake_pred.size()).cuda())
+            # train with trues
+            true_pred = - t.log(  D(t.cat((true_xs, true_ys), dim=1)) ).mean()
+            true_pred.backward(t.ones(true_pred.size()).cuda())
             opt_D.step()
+            # print(-fake_pred-true_pred)
+            
+            # noise = Variable(t.rand(BATCH_SIZE, 100)).cuda()
+            # true_xs, true_ys = Variable(batch_xs).view(-1, 784).cuda(), Variable(batch_ys).cuda()
+            # opt_D.zero_grad()
+            # fake_xs = G(t.cat((noise, true_ys), dim=1))
+            # w_loss = w_gp_loss(D_model=D, fxs=t.cat((fake_xs, true_ys), dim=1), rxs=t.cat((true_xs, true_ys), dim=1))
+            # w_loss.backward()
+            # opt_D.step()
             # print(w_loss)
 
 
 
         opt_G.zero_grad()
-        noise = Variable(t.rand(BATCH_SIZE, 100, 1, 1, 1).view(BATCH_SIZE, 100)).cuda()
+        noise = Variable(t.rand(BATCH_SIZE, 100)).cuda()
         fake_xs = G(t.cat((noise, true_ys), dim=1))
-        G_loss = - D(t.cat((fake_xs, true_ys), dim=1)).mean()
+        G_loss = t.log(  1 - D(t.cat((fake_xs, true_ys), dim=1)) ).mean()
         G_loss.backward()
         opt_G.step()
 
@@ -111,7 +112,7 @@ if __name__ == '__main__':
                 [np.hstack([img for img in imgs_25[s:s + col_size]]) for s in range(0, col_size * 5, col_size)])
 
             plt.imshow(grid_imgs, cmap='gray')
-            plt.savefig("./DCGAN_imgs/CGAN_" + str(epoch) + ".jpg")
+            plt.savefig("./DCGAN_imgs/CGAN/CGAN_" + str(epoch) + ".jpg")
             print("epoch: ", epoch)
 
 
