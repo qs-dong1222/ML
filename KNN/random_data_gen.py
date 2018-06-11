@@ -125,4 +125,6 @@ if(verbose):
 
 
 # save dataset
-# do_something_to_save()
+xp.save("features.npy", X)
+xp.save("labels.npy", labels)
+print("save ./features.npy and ./labels.npy")
