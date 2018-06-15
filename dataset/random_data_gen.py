@@ -40,6 +40,7 @@ parser.add_argument('--dataset_type', '-dt', nargs='?', type=int, default=0, hel
                                                                                   '0: classification. '
                                                                                   '1: cluster. '
                                                                                   '2: circular. ')
+parser.add_argument('--directory', '-dir', nargs='?', default="./", help='output directory path')
 parser.add_argument('--verbose', '-v', action='store_true', help='verbose mode')  # false when not provided
 args = parser.parse_args()
 
@@ -51,8 +52,11 @@ simplicity = args.simplicity
 cluster_std = args.cluster_std
 feature_range = args.feature_range
 dataset_type = args.dataset_type
+directory = args.directory
 verbose = args.verbose
 
+if(directory[-1] != '/'):
+    directory += '/'
 
 if(dataset_type==0):
     from sklearn.datasets.samples_generator import make_classification
@@ -125,6 +129,8 @@ if(verbose):
 
 
 # save dataset
-xp.save("features.npy", X)
-xp.save("labels.npy", labels)
-print("save ./features.npy and ./labels.npy")
+xp.save(directory+"features.npy", X)
+xp.save(directory+"labels.npy", labels)
+print("save: " + directory + "features.npy")
+print("save: " + directory + "labels.npy")
+
