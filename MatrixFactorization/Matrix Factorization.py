@@ -1,7 +1,7 @@
 """
 The idea of Matrixfactorization is treating the given matrix as the multiplication result
-between 2 matrice. THe element in these 2 matrice are features waiting to be trained.
-One of the 2 matrix represents the feature that each row has such that the row is able to
+between 2 matrice. THe elements in these 2 matrice are features waiting to be trained.
+One of the 2 matrice represents the feature that each row has such that the row is able to
 approach to the multiplication result. Same thing for the other matrix but represents the
 features for each column. The number of features are randomly defined which correspondes 
 to the "feature_dim" parameter below.
