@@ -8,3 +8,4 @@ Pytorch/MNIST/MNIST_processing.py
 *.idx1-ubyte
 *.jpg
 /dataset
+/doc
